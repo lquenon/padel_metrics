@@ -12,6 +12,8 @@ interface HistoryState {
   updateMatch: (matchId: string, updates: Partial<Match>) => void;
   removeMatch: (matchId: string) => void;
   clearHistory: () => void;
+  clearMatches: () => void;
+  replaceMatches: (matches: Match[]) => void;
 
   // Getters
   getMatchById: (matchId: string) => Match | undefined;
@@ -62,6 +64,17 @@ export const useHistoryStore = create<HistoryState>((set, get) => ({
   clearHistory: () => {
     matchesStorage.clear();
     set({ matches: [] });
+  },
+
+  clearMatches: () => {
+    matchesStorage.clear();
+    set({ matches: [] });
+  },
+
+  replaceMatches: (matches) => {
+    matchesStorage.clear();
+    matches.forEach((match) => matchesStorage.add(match));
+    set({ matches });
   },
 
   getMatchById: (matchId) => {

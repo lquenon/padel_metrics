@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useMatchStore } from '../stores';
 import { useTimer } from '../hooks/useTimer';
@@ -18,17 +18,43 @@ export default function MatchTracking() {
   const addTouch = useMatchStore((state) => state.addTouch);
   const scorePoint = useMatchStore((state) => state.scorePoint);
   const undoLastPoint = useMatchStore((state) => state.undoLastPoint);
+  const updateDuration = useMatchStore((state) => state.updateDuration);
   const pauseMatch = useMatchStore((state) => state.pauseMatch);
+  const resumeMatch = useMatchStore((state) => state.resumeMatch);
   const endMatch = useMatchStore((state) => state.endMatch);
 
   const timer = useTimer(currentMatch?.duration || 0);
+  const timerSecondsRef = useRef(timer.seconds);
 
-  // Démarrer le chrono au montage
+  // Mettre à jour la ref quand les secondes changent
   useEffect(() => {
-    if (currentMatch && currentMatch.status === 'in_progress') {
+    timerSecondsRef.current = timer.seconds;
+  }, [timer.seconds]);
+
+  // Reprendre le match si en pause
+  useEffect(() => {
+    if (currentMatch?.status === 'paused') {
+      resumeMatch();
+    }
+  }, [currentMatch?.status, resumeMatch]);
+
+  // Démarrer le chrono quand le match est en cours
+  useEffect(() => {
+    if (currentMatch?.status === 'in_progress' && !timer.isRunning) {
       timer.start();
     }
-  }, []);
+  }, [currentMatch?.status]);
+
+  // Mettre à jour la durée du match toutes les secondes
+  useEffect(() => {
+    if (!timer.isRunning) return;
+
+    const interval = setInterval(() => {
+      updateDuration(timerSecondsRef.current);
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [timer.isRunning, updateDuration]);
 
   // Rediriger si pas de match
   useEffect(() => {
@@ -40,9 +66,9 @@ export default function MatchTracking() {
   // Rediriger si match terminé
   useEffect(() => {
     if (currentMatch?.status === 'completed') {
-      navigate(`/match/summary/${currentMatch.id}`);
+      navigate('/summary');
     }
-  }, [currentMatch?.status, currentMatch?.id, navigate]);
+  }, [currentMatch?.status, navigate]);
 
   if (!currentMatch) {
     return null;

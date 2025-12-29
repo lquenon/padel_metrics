@@ -67,8 +67,8 @@ export function getDisplayScore(
   }
 
   if (isDeuce) {
-    if (advantage === 'us') return '40-A';
-    if (advantage === 'them') return 'A-40';
+    if (advantage === 'us') return 'A-40';
+    if (advantage === 'them') return '40-A';
     return '40-40';
   }
 
@@ -110,24 +110,7 @@ export function calculatePointScore(game: Game, winner: Team): boolean {
   const currentScoreUs = game.score.us;
   const currentScoreThem = game.score.them;
 
-  // Incrémenter le score
-  if (winner === 'us') {
-    game.score.us = Math.min(currentScoreUs + 15, 40);
-  } else {
-    game.score.them = Math.min(currentScoreThem + 15, 40);
-  }
-
-  const newScoreUs = game.score.us;
-  const newScoreThem = game.score.them;
-
-  // Cas 40-40 (égalité / deuce)
-  if (newScoreUs === 40 && newScoreThem === 40) {
-    game.isDeuce = true;
-    game.advantage = null;
-    return false;
-  }
-
-  // Cas avec avantage
+  // Cas avec égalité et avantage
   if (game.isDeuce) {
     if (game.advantage === null) {
       // Pas encore d'avantage, on donne l'avantage au gagnant du point
@@ -145,22 +128,31 @@ export function calculatePointScore(game: Game, winner: Team): boolean {
     }
   }
 
-  // Cas jeu gagné sans égalité (un joueur atteint 40 et l'autre < 40)
-  if (newScoreUs === 40 && newScoreThem < 40) {
-    // Vérifier si on vient de gagner (score précédent était 30)
-    if (currentScoreUs === 30) {
-      game.winner = 'us';
-      game.status = 'completed';
-      return true;
-    }
+  // Cas jeu gagné : on est à 40 et l'adversaire < 40
+  if (currentScoreUs === 40 && currentScoreThem < 40 && winner === 'us') {
+    game.winner = 'us';
+    game.status = 'completed';
+    return true;
   }
 
-  if (newScoreThem === 40 && newScoreUs < 40) {
-    if (currentScoreThem === 30) {
-      game.winner = 'them';
-      game.status = 'completed';
-      return true;
-    }
+  if (currentScoreThem === 40 && currentScoreUs < 40 && winner === 'them') {
+    game.winner = 'them';
+    game.status = 'completed';
+    return true;
+  }
+
+  // Incrémenter le score du gagnant du point
+  if (winner === 'us') {
+    game.score.us = Math.min(currentScoreUs + 15, 40);
+  } else {
+    game.score.them = Math.min(currentScoreThem + 15, 40);
+  }
+
+  // Cas 40-40 (égalité / deuce)
+  if (game.score.us === 40 && game.score.them === 40) {
+    game.isDeuce = true;
+    game.advantage = null;
+    return false;
   }
 
   return false;
@@ -319,26 +311,13 @@ export function scorePoint(
     throw new Error('No current game found');
   }
 
-  // 1. Créer le Point object
-  const point: Point = {
-    pointNumber: currentGame.points.length + 1,
-    timestamp: new Date().toISOString(),
-    touches: {
-      left: touchesLeft,
-      right: touchesRight,
-    },
-    winner,
-    scoreAfter: {
-      us: currentGame.score.us,
-      them: currentGame.score.them,
-    },
+  // 1. Capturer le score AVANT le point
+  const scoreBefore = {
+    us: currentGame.score.us,
+    them: currentGame.score.them,
   };
 
-  // 2. Sauvegarder le point
-  currentGame.points.push(point);
-  currentGame.currentPoint++;
-
-  // 3. Mettre à jour les stats du jeu
+  // 2. Mettre à jour les stats du jeu
   currentGame.stats.touchesLeft += touchesLeft;
   currentGame.stats.touchesRight += touchesRight;
   currentGame.stats.totalTouches += touchesLeft + touchesRight;
@@ -348,14 +327,28 @@ export function scorePoint(
     currentGame.stats.pointsLost++;
   }
 
-  // 4. Calculer le nouveau score de point
+  // 3. Calculer le nouveau score de point
   const gameWon = calculatePointScore(currentGame, winner);
 
-  // Mettre à jour scoreAfter du point
-  point.scoreAfter = {
-    us: currentGame.score.us,
-    them: currentGame.score.them,
+  // 4. Créer le Point object avec scores avant/après
+  const point: Point = {
+    pointNumber: currentGame.points.length + 1,
+    timestamp: new Date().toISOString(),
+    touches: {
+      left: touchesLeft,
+      right: touchesRight,
+    },
+    winner,
+    scoreBefore,
+    scoreAfter: {
+      us: currentGame.score.us,
+      them: currentGame.score.them,
+    },
   };
+
+  // 5. Sauvegarder le point
+  currentGame.points.push(point);
+  currentGame.currentPoint++;
 
   let setWon = false;
   let matchWon = false;
@@ -420,64 +413,29 @@ export function undoLastPoint(match: Match): boolean {
   if (!currentSet) return false;
 
   const currentGame = getCurrentGame(currentSet);
-  if (!currentGame) return false;
 
-  // Vérifier s'il y a des points à annuler
-  if (currentGame.points.length === 0) {
-    // Essayer le jeu précédent
-    if (currentSet.games.length > 1) {
-      const previousGame = currentSet.games[currentSet.games.length - 2];
-      if (previousGame.points.length > 0) {
-        // Annuler le dernier point du jeu précédent
-        const lastPoint = previousGame.points.pop()!;
+  // Cas 1 : Le jeu actuel a des points → annuler le dernier point du jeu actuel
+  if (currentGame && currentGame.points.length > 0) {
+    const lastPoint = currentGame.points.pop()!;
 
-        // Restaurer les stats
-        previousGame.stats.touchesLeft -= lastPoint.touches.left;
-        previousGame.stats.touchesRight -= lastPoint.touches.right;
-        previousGame.stats.totalTouches -= lastPoint.touches.left + lastPoint.touches.right;
+    // Restaurer les stats
+    currentGame.stats.touchesLeft -= lastPoint.touches.left;
+    currentGame.stats.touchesRight -= lastPoint.touches.right;
+    currentGame.stats.totalTouches -= lastPoint.touches.left + lastPoint.touches.right;
 
-        if (lastPoint.winner === 'us') {
-          previousGame.stats.pointsWon--;
-        } else {
-          previousGame.stats.pointsLost--;
-        }
-
-        // Recalculer le score (complexe, pour v1 on skip)
-        return true;
-      }
-    }
-    return false;
-  }
-
-  // Annuler le dernier point du jeu actuel
-  const lastPoint = currentGame.points.pop()!;
-
-  // Restaurer les stats
-  currentGame.stats.touchesLeft -= lastPoint.touches.left;
-  currentGame.stats.touchesRight -= lastPoint.touches.right;
-  currentGame.stats.totalTouches -= lastPoint.touches.left + lastPoint.touches.right;
-
-  if (lastPoint.winner === 'us') {
-    currentGame.stats.pointsWon--;
-  } else {
-    currentGame.stats.pointsLost--;
-  }
-
-  currentGame.currentPoint--;
-
-  // Restaurer le score précédent (difficile car on ne sait pas le score avant)
-  // Pour v1, on simplifie: on décrémente juste
-  if (currentGame.isTiebreak) {
-    currentGame.score[lastPoint.winner]--;
-  } else {
-    // Pour un jeu normal, c'est plus complexe
-    // On doit recalculer depuis le début (ou stocker l'historique)
-    // Pour v1 MVP, on va juste décrementer de 15
-    if (currentGame.score[lastPoint.winner] > 0) {
-      currentGame.score[lastPoint.winner] -= 15;
+    if (lastPoint.winner === 'us') {
+      currentGame.stats.pointsWon--;
+    } else {
+      currentGame.stats.pointsLost--;
     }
 
-    // Reset deuce/advantage (simplification v1)
+    currentGame.currentPoint--;
+
+    // Restaurer le score EXACT depuis scoreBefore
+    currentGame.score.us = lastPoint.scoreBefore.us;
+    currentGame.score.them = lastPoint.scoreBefore.them;
+
+    // Recalculer deuce/advantage
     if (currentGame.score.us === 40 && currentGame.score.them === 40) {
       currentGame.isDeuce = true;
       currentGame.advantage = null;
@@ -485,9 +443,122 @@ export function undoLastPoint(match: Match): boolean {
       currentGame.isDeuce = false;
       currentGame.advantage = null;
     }
+
+    return true;
   }
 
-  return true;
+  // Cas 2 : Le jeu actuel n'a pas de points → essayer le jeu précédent du set actuel
+  if (currentSet.games.length > 1) {
+    const previousGame = currentSet.games[currentSet.games.length - 2];
+    if (previousGame.points.length > 0) {
+      // Annuler le dernier point du jeu précédent
+      const lastPoint = previousGame.points.pop()!;
+
+      // Restaurer les stats
+      previousGame.stats.touchesLeft -= lastPoint.touches.left;
+      previousGame.stats.touchesRight -= lastPoint.touches.right;
+      previousGame.stats.totalTouches -= lastPoint.touches.left + lastPoint.touches.right;
+
+      if (lastPoint.winner === 'us') {
+        previousGame.stats.pointsWon--;
+      } else {
+        previousGame.stats.pointsLost--;
+      }
+
+      // Supprimer le jeu actuel (qui n'a pas de points)
+      currentSet.games.pop();
+      currentSet.currentGame = previousGame.gameNumber;
+
+      // Remettre le jeu précédent en cours
+      previousGame.status = 'in_progress';
+      previousGame.winner = null;
+
+      // Restaurer le score EXACT du jeu depuis scoreBefore
+      previousGame.score.us = lastPoint.scoreBefore.us;
+      previousGame.score.them = lastPoint.scoreBefore.them;
+
+      // Recalculer deuce/advantage
+      if (previousGame.score.us === 40 && previousGame.score.them === 40) {
+        previousGame.isDeuce = true;
+        previousGame.advantage = null;
+      } else {
+        previousGame.isDeuce = false;
+        previousGame.advantage = null;
+      }
+
+      // Décrémenter le score de jeux
+      const gameWinner = lastPoint.winner;
+      if (currentSet.score[gameWinner] > 0) {
+        currentSet.score[gameWinner]--;
+      }
+
+      return true;
+    }
+  }
+
+  // Cas 3 : Le set actuel n'a pas de points → essayer le set précédent
+  if (match.sets.length > 1) {
+    const previousSet = match.sets[match.sets.length - 2];
+    if (previousSet.games.length > 0) {
+      const lastGameOfPreviousSet = previousSet.games[previousSet.games.length - 1];
+      if (lastGameOfPreviousSet.points.length > 0) {
+        // Annuler le dernier point du set précédent
+        const lastPoint = lastGameOfPreviousSet.points.pop()!;
+
+        // Restaurer les stats du jeu
+        lastGameOfPreviousSet.stats.touchesLeft -= lastPoint.touches.left;
+        lastGameOfPreviousSet.stats.touchesRight -= lastPoint.touches.right;
+        lastGameOfPreviousSet.stats.totalTouches -= lastPoint.touches.left + lastPoint.touches.right;
+
+        if (lastPoint.winner === 'us') {
+          lastGameOfPreviousSet.stats.pointsWon--;
+        } else {
+          lastGameOfPreviousSet.stats.pointsLost--;
+        }
+
+        // Supprimer le set actuel (qui n'a pas de points)
+        match.sets.pop();
+        match.currentSet = previousSet.setNumber;
+
+        // Remettre le set précédent en cours
+        previousSet.status = 'in_progress';
+        previousSet.winner = null;
+
+        // Remettre le dernier jeu en cours
+        lastGameOfPreviousSet.status = 'in_progress';
+        lastGameOfPreviousSet.winner = null;
+
+        // Restaurer le score EXACT du jeu depuis scoreBefore
+        lastGameOfPreviousSet.score.us = lastPoint.scoreBefore.us;
+        lastGameOfPreviousSet.score.them = lastPoint.scoreBefore.them;
+
+        // Recalculer deuce/advantage
+        if (lastGameOfPreviousSet.score.us === 40 && lastGameOfPreviousSet.score.them === 40) {
+          lastGameOfPreviousSet.isDeuce = true;
+          lastGameOfPreviousSet.advantage = null;
+        } else {
+          lastGameOfPreviousSet.isDeuce = false;
+          lastGameOfPreviousSet.advantage = null;
+        }
+
+        // Décrémenter le score de sets
+        if (match.finalScore[lastPoint.winner] > 0) {
+          match.finalScore[lastPoint.winner]--;
+        }
+
+        // Rétablir le statut du match si nécessaire
+        if (match.status === 'completed') {
+          match.status = 'in_progress';
+          match.winner = null;
+          match.completedAt = undefined;
+        }
+
+        return true;
+      }
+    }
+  }
+
+  return false;
 }
 
 // ============================================

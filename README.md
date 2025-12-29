@@ -37,6 +37,70 @@ Les fichiers optimisés seront générés dans le dossier `dist/`.
 npm run preview
 ```
 
+## 📱 PWA (Progressive Web App)
+
+PadelTracker est une PWA complète qui peut être installée sur mobile et desktop.
+
+### Fonctionnalités PWA
+
+- ✅ Installation sur l'écran d'accueil (mobile/desktop)
+- ✅ Mode offline fonctionnel
+- ✅ Icônes adaptatives pour tous les appareils
+- ✅ Raccourcis vers Nouveau Match et Stats
+- ✅ Thème personnalisé (#a640f5)
+- ✅ Cache intelligent des assets
+- ✅ Mises à jour automatiques
+
+### Tester la PWA en local
+
+```bash
+# Build de production
+npm run build
+
+# Preview avec HTTPS (requis pour PWA)
+npm run preview
+
+# Ouvrir dans le navigateur
+# http://localhost:4173
+```
+
+**Installation :**
+- **Desktop** : Icône + dans la barre d'adresse de Chrome/Edge
+- **Mobile** : Menu → "Ajouter à l'écran d'accueil"
+
+**Vérifier le Service Worker :**
+1. Ouvrir DevTools (F12)
+2. Application → Service Workers
+3. Vérifier que le SW est actif
+
+**Test mode offline :**
+1. Ouvrir l'application
+2. DevTools → Network → Throttling : Offline
+3. Recharger la page → L'app fonctionne !
+
+### Générer les icônes PWA
+
+Si vous modifiez `public/icon.svg` :
+
+```bash
+npm run generate-icons
+```
+
+## 🚀 Déploiement
+
+Consultez [DEPLOYMENT.md](./DEPLOYMENT.md) pour un guide complet de déploiement sur :
+- Vercel (recommandé)
+- Netlify
+- GitHub Pages
+
+**Quick deploy sur Vercel :**
+
+```bash
+npm install -g vercel
+vercel login
+vercel --prod
+```
+
 ## 📁 Structure du Projet
 
 ```
@@ -113,15 +177,85 @@ src/
 
 **VERSION FONCTIONNELLE MINIMALE ATTEINTE ! 🎉**
 
-### 🔄 Phases Suivantes
+### ✅ Phase 2 : Configuration de Match (COMPLÉTÉ)
 
-- [ ] Phase 2 : Configuration de Match (formulaire)
-- [ ] Phase 5 : Écran Résumé (stats détaillées)
-- [ ] Phase 5 : Écran Résumé
-- [ ] Phase 6 : Dashboard & Navigation
-- [ ] Phase 7 : Historique & Stats Globales
-- [ ] Phase 8 : Paramètres & Export
-- [ ] Phase 9 : PWA & Déploiement
+- [x] Composants Input et Select
+- [x] Page MatchSetup avec formulaire complet
+- [x] Saisie des noms des joueurs (notre équipe + adversaires)
+- [x] Configuration du format (meilleur des 3 ou 5 sets)
+- [x] Option tie-break dans le set final
+- [x] Validation des champs
+- [x] Navigation depuis Home vers MatchSetup puis Tracking
+
+### ✅ Phase 5 : Écran Résumé (COMPLÉTÉ)
+
+- [x] Composant StatCard (cartes statistiques)
+- [x] Composant SetStats (statistiques par set)
+- [x] Page MatchSummary complète
+- [x] Affichage victoire/défaite
+- [x] Score final et détail des sets
+- [x] Statistiques globales (durée, points, touches)
+- [x] Répartition des touches par joueur avec graphiques
+- [x] Détails par set avec pourcentages
+- [x] Sauvegarde dans l'historique
+- [x] Mise à jour automatique de la durée
+- [x] Navigation vers nouveau match ou accueil
+
+### ✅ Phase 6 : Dashboard & Navigation (COMPLÉTÉ)
+
+- [x] Composant NavBar (navigation bottom)
+- [x] Intégration NavBar dans App.tsx
+- [x] Page Home refonte complète (dashboard)
+- [x] Statistiques rapides (matchs, victoires, défaites, taux)
+- [x] Affichage match en cours
+- [x] Liste derniers matchs
+- [x] Liens rapides vers Stats et Settings
+- [x] État vide avec message d'accueil
+- [x] Navigation fluide entre toutes les sections
+
+### ✅ Phase 7 : Historique & Stats Globales (COMPLÉTÉ)
+
+- [x] Page History avec filtres (tous/victoires/défaites)
+- [x] Tri par date (ascendant/descendant)
+- [x] Modal détails du match
+- [x] Page Stats complète
+- [x] Statistiques globales (matchs, victoires, défaites, taux victoire)
+- [x] Séries de victoires/défaites (actuelle, records)
+- [x] Statistiques de jeu (points, touches, moyenne)
+- [x] Répartition des touches par joueur avec graphiques
+- [x] Statistiques par joueur unique
+
+### ✅ Phase 8 : Paramètres & Export (COMPLÉTÉ)
+
+- [x] Service d'export (exportService.ts)
+- [x] Page Settings complète
+- [x] Section profil utilisateur (nom, date création)
+- [x] Paramètres de match (sets par défaut, tie-break)
+- [x] Export données JSON (match + settings + user)
+- [x] Export matchs CSV
+- [x] Import données JSON
+- [x] Statistiques de stockage (taille utilisée)
+- [x] Suppression de toutes les données (avec confirmation)
+- [x] Réinitialisation des paramètres
+- [x] Section À propos (version, crédits)
+
+### ✅ Phase 9 : PWA & Déploiement (COMPLÉTÉ)
+
+- [x] Installation vite-plugin-pwa
+- [x] Configuration complète vite.config.ts
+- [x] Manifest PWA (nom, icônes, couleurs, shortcuts)
+- [x] Génération automatique des icônes (192x192, 512x512, maskable)
+- [x] Service Worker avec Workbox (cache, offline)
+- [x] Meta tags PWA (Apple, Android, Open Graph, Twitter)
+- [x] Configuration déploiement Vercel (vercel.json)
+- [x] Configuration déploiement Netlify (netlify.toml)
+- [x] Guide de déploiement complet (DEPLOYMENT.md)
+- [x] Headers de sécurité (CSP, XSS, MIME)
+- [x] Raccourcis PWA (Nouveau match, Stats)
+- [x] Mode offline fonctionnel
+
+### 🔄 Phase Suivante
+
 - [ ] Phase 10 : Polish & Tests
 
 ## 📄 Licence
@@ -130,4 +264,4 @@ MIT
 
 ## 👤 Auteur
 
-Développé avec Claude Code
+Développé avec Claude Code par Laurent Quenon

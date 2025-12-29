@@ -15,6 +15,11 @@ export function useTimer(initialSeconds = 0): UseTimerReturn {
   const [isRunning, setIsRunning] = useState(false);
   const intervalRef = useRef<number | null>(null);
 
+  // Mettre à jour les secondes quand initialSeconds change
+  useEffect(() => {
+    setSeconds(initialSeconds);
+  }, [initialSeconds]);
+
   useEffect(() => {
     if (isRunning) {
       intervalRef.current = window.setInterval(() => {

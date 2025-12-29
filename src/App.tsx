@@ -5,6 +5,9 @@ import { useUserStore, useSettingsStore, useHistoryStore, useMatchStore } from '
 // Import des tests (disponibles via window.testMatchEngine)
 import './services/matchEngine.test';
 
+// Components
+import NavBar from './components/layout/NavBar';
+
 // Pages
 import Home from './pages/Home';
 import MatchSetup from './pages/MatchSetup';
@@ -30,15 +33,15 @@ function App() {
 
   return (
     <BrowserRouter>
-      <div className="dark min-h-screen bg-background-dark">
+      <div className="dark min-h-screen bg-background-dark pb-20">
         <Routes>
           {/* Home / Dashboard */}
           <Route path="/" element={<Home />} />
 
           {/* Match Flow */}
-          <Route path="/match/setup" element={<MatchSetup />} />
-          <Route path="/match/tracking" element={<MatchTracking />} />
-          <Route path="/match/summary/:id?" element={<MatchSummary />} />
+          <Route path="/setup" element={<MatchSetup />} />
+          <Route path="/tracking" element={<MatchTracking />} />
+          <Route path="/summary" element={<MatchSummary />} />
 
           {/* Navigation */}
           <Route path="/history" element={<History />} />
@@ -48,6 +51,9 @@ function App() {
           {/* Fallback */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
+
+        {/* Bottom Navigation */}
+        <NavBar />
       </div>
     </BrowserRouter>
   );

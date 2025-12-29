@@ -144,6 +144,12 @@ export interface Point {
   // Résultat du point
   winner: Team;
 
+  // Score AVANT ce point (pour l'undo)
+  scoreBefore: {
+    us: number;
+    them: number;
+  };
+
   // Score APRÈS ce point
   scoreAfter: {
     us: number;

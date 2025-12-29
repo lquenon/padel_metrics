@@ -26,6 +26,7 @@ interface MatchState {
   addTouch: (player: 'left' | 'right') => void;
   scorePoint: (team: Team) => void;
   undoLastPoint: () => void;
+  updateDuration: (seconds: number) => void;
   pauseMatch: () => void;
   resumeMatch: () => void;
   endMatch: () => void;
@@ -185,6 +186,20 @@ export const useMatchStore = create<MatchState>((set) => ({
         console.error('Erreur lors de l\'annulation:', error);
         return state;
       }
+    });
+  },
+
+  updateDuration: (seconds) => {
+    set((state) => {
+      if (!state.currentMatch) return state;
+
+      const updatedMatch = {
+        ...state.currentMatch,
+        duration: seconds,
+      };
+
+      currentMatchStorage.set(updatedMatch);
+      return { currentMatch: updatedMatch };
     });
   },
 

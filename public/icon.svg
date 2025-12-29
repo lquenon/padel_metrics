@@ -1,0 +1,30 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="512" height="512" rx="128" fill="#1a1022"/>
+
+  <!-- Padel racket -->
+  <g transform="translate(100, 80)">
+    <!-- Racket head -->
+    <ellipse cx="100" cy="100" rx="85" ry="90" fill="#a640f5" opacity="0.2"/>
+    <ellipse cx="100" cy="100" rx="75" ry="80" fill="none" stroke="#a640f5" stroke-width="12"/>
+
+    <!-- Grid pattern -->
+    <line x1="100" y1="30" x2="100" y2="170" stroke="#a640f5" stroke-width="3" opacity="0.6"/>
+    <line x1="70" y1="50" x2="70" y2="150" stroke="#a640f5" stroke-width="3" opacity="0.6"/>
+    <line x1="130" y1="50" x2="130" y2="150" stroke="#a640f5" stroke-width="3" opacity="0.6"/>
+
+    <line x1="30" y1="100" x2="170" y2="100" stroke="#a640f5" stroke-width="3" opacity="0.6"/>
+    <line x1="50" y1="70" x2="150" y2="70" stroke="#a640f5" stroke-width="3" opacity="0.6"/>
+    <line x1="50" y1="130" x2="150" y2="130" stroke="#a640f5" stroke-width="3" opacity="0.6"/>
+
+    <!-- Handle -->
+    <rect x="85" y="190" width="30" height="120" rx="15" fill="#a640f5"/>
+    <rect x="90" y="195" width="20" height="110" rx="10" fill="#00f0ff" opacity="0.3"/>
+  </g>
+
+  <!-- Padel ball -->
+  <circle cx="350" cy="320" r="45" fill="#00f0ff"/>
+  <circle cx="350" cy="320" r="40" fill="none" stroke="#a640f5" stroke-width="3"/>
+  <path d="M 330 300 Q 350 320 370 340" stroke="#a640f5" stroke-width="3" fill="none"/>
+  <path d="M 330 340 Q 350 320 370 300" stroke="#a640f5" stroke-width="3" fill="none"/>
+</svg>
