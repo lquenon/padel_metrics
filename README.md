@@ -96,10 +96,27 @@ src/
 - Ouvrir la console navigateur
 - Exécuter : `window.testMatchEngine.runAllTests()`
 
+### ✅ Phase 4 : Écran Tracking - CŒUR (COMPLÉTÉ)
+
+- [x] Composants UI de base (Button, Card)
+- [x] Hook useTimer (chronomètre fonctionnel)
+- [x] Composant Timer (affichage temps)
+- [x] Composant ScoreDisplay (score géant)
+- [x] Composant SetScoreboard (mini tableau sets)
+- [x] Composant TouchCounter (zones tactiles géantes 2 couleurs)
+- [x] Composant PointButton (boutons marquer points)
+- [x] Page MatchTracking complète et fonctionnelle
+- [x] Intégration complète avec le moteur de score
+- [x] Gestion pause/reprise/fin de match
+- [x] Bouton undo flottant
+- [x] Page Home temporaire pour tester
+
+**VERSION FONCTIONNELLE MINIMALE ATTEINTE ! 🎉**
+
 ### 🔄 Phases Suivantes
 
-- [ ] Phase 2 : Configuration de Match
-- [ ] Phase 4 : Écran Tracking (CŒUR)
+- [ ] Phase 2 : Configuration de Match (formulaire)
+- [ ] Phase 5 : Écran Résumé (stats détaillées)
 - [ ] Phase 5 : Écran Résumé
 - [ ] Phase 6 : Dashboard & Navigation
 - [ ] Phase 7 : Historique & Stats Globales
