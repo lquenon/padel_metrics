@@ -9,6 +9,8 @@ jobs:
   deploy:
     name: Deploy to Vercel
     runs-on: ubuntu-latest
+    # Only run if Vercel secrets are configured
+    if: ${{ secrets.VERCEL_TOKEN != '' }}
 
     steps:
       - name: 📥 Checkout code

@@ -8,6 +8,8 @@ jobs:
   preview:
     name: Deploy Preview
     runs-on: ubuntu-latest
+    # Only run if Vercel secrets are configured
+    if: ${{ secrets.VERCEL_TOKEN != '' }}
 
     steps:
       - name: 📥 Checkout code
