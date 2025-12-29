@@ -2,6 +2,12 @@
 
 Progressive Web App pour tracker vos matchs de padel en double (2v2) avec statistiques détaillées.
 
+[![CI](https://github.com/USERNAME/padel-tracker/actions/workflows/ci.yml/badge.svg)](https://github.com/USERNAME/padel-tracker/actions/workflows/ci.yml)
+[![Deploy](https://github.com/USERNAME/padel-tracker/actions/workflows/deploy-vercel.yml/badge.svg)](https://github.com/USERNAME/padel-tracker/actions/workflows/deploy-vercel.yml)
+[![Security](https://github.com/USERNAME/padel-tracker/actions/workflows/security.yml/badge.svg)](https://github.com/USERNAME/padel-tracker/actions/workflows/security.yml)
+
+> ⚠️ **Note**: Remplacez `USERNAME` par votre nom d'utilisateur GitHub dans les badges ci-dessus.
+
 ## 🚀 Développement
 
 ### Prérequis

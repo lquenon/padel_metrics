@@ -1,0 +1,58 @@
+name: Preview PR
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  preview:
+    name: Deploy Preview
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 📦 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: 📥 Install dependencies
+        run: npm ci
+
+      - name: 🎨 Generate PWA icons
+        run: npm run generate-icons
+
+      - name: 🏗️ Build
+        run: npm run build
+
+      - name: 🔍 Preview Deploy to Vercel
+        uses: amondnet/vercel-action@v25
+        id: vercel-deploy
+        with:
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
+          vercel-args: ''
+          working-directory: ./
+
+      - name: 💬 Comment PR with preview URL
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `## 🎉 Preview Deployment Ready!\n\n**Preview URL:** ${{ steps.vercel-deploy.outputs.preview-url }}\n\n✅ Build successful\n📱 PWA enabled\n🔒 HTTPS\n\nTest your changes on the preview deployment before merging!`
+            })
+
+      - name: ✅ Preview Summary
+        run: |
+          echo "## 🔍 Preview Deployment" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Preview URL:** ${{ steps.vercel-deploy.outputs.preview-url }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Test the changes before merging!" >> $GITHUB_STEP_SUMMARY

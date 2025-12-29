@@ -1,0 +1,65 @@
+name: Security & Dependency Check
+
+on:
+  schedule:
+    # Run every Monday at 9am UTC
+    - cron: '0 9 * * 1'
+  workflow_dispatch:
+  push:
+    branches: [main, master]
+
+jobs:
+  dependency-audit:
+    name: Dependency Audit
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 📦 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: 🔍 Run npm audit
+        run: |
+          npm audit --audit-level=moderate || true
+          npm audit --json > audit-results.json || true
+
+      - name: 📊 Audit Summary
+        run: |
+          echo "## 🔒 Security Audit" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          if [ -f audit-results.json ]; then
+            VULNERABILITIES=$(cat audit-results.json | grep -o '"total":[0-9]*' | head -1 | cut -d':' -f2)
+            if [ "$VULNERABILITIES" = "0" ]; then
+              echo "✅ No vulnerabilities found!" >> $GITHUB_STEP_SUMMARY
+            else
+              echo "⚠️ Found $VULNERABILITIES vulnerabilities" >> $GITHUB_STEP_SUMMARY
+              echo "" >> $GITHUB_STEP_SUMMARY
+              echo "Run \`npm audit fix\` to resolve them." >> $GITHUB_STEP_SUMMARY
+            fi
+          fi
+
+      - name: 📤 Upload audit results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: security-audit
+          path: audit-results.json
+          retention-days: 30
+
+  dependency-review:
+    name: Dependency Review
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🔍 Dependency Review
+        uses: actions/dependency-review-action@v4
+        with:
+          fail-on-severity: moderate
