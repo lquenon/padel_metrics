@@ -43,6 +43,7 @@ export default function MatchTracking() {
     if (currentMatch?.status === 'in_progress' && !timer.isRunning) {
       timer.start();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentMatch?.status]);
 
   // Mettre à jour la durée du match toutes les secondes

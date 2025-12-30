@@ -40,7 +40,7 @@ export default function Settings() {
   const [showImportSuccess, setShowImportSuccess] = useState(false);
 
   // Statistiques de stockage
-  const storageStats = useMemo(() => getStorageSize(), [matches, settings, user]);
+  const storageStats = useMemo(() => getStorageSize(), []);
 
   // ============================================
   // HANDLERS - PROFIL UTILISATEUR
